@@ -1,5 +1,18 @@
 # Dream Match App
 
+## Configuración de Variables de Entorno
+
+Antes de comenzar con el proyecto, debes configurar las variables de entorno necesarias. Sigue estos pasos:
+
+1. **Obtén tu API Key:**
+
+   - Regístrate o inicia sesión en [API-Football](https://apifootball.com/).
+   - Accede a tu panel de usuario y copia tu API Key.
+
+2. **Configura las variables de entorno:**
+   - Copia el archivo `.env.example` a un archivo `.env` en el mismo directorio raíz del proyecto.
+   - Abre el archivo `.env` y agrega tu API Key
+
 ## Getting Started
 
 Tienes dos opciones para comenzar con este proyecto:
