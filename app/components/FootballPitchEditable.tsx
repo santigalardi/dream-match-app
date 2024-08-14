@@ -38,7 +38,22 @@ const FootballPitchEditable: React.FC<FootballPitchEditableProps> = ({
 
   return (
     <div className="relative">
-      <Image src={'/half-pitch.png'} alt="half-soccer-pitch" width={400} height={350} layout="responsive" />
+      <Image
+        src={'/half-pitch.png'}
+        alt="half-soccer-pitch"
+        width={2000}
+        height={2000}
+        className="block lg:hidden" // Solo se muestra en dispositivos pequeños
+        priority
+      />
+      <Image
+        src={'/half-pitch.png'}
+        alt="half-soccer-pitch"
+        width={2000}
+        height={2000}
+        className="hidden lg:block"
+        priority
+      />
       {positions.map((position) => {
         const player = players.find((p) => p.player_id === position.player_id);
 

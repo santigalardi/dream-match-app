@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Kanit } from 'next/font/google';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 const kanit = Kanit({
@@ -19,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth font-bold">
-      <body className={kanit.className}>{children}</body>
+      <body className={kanit.className}>
+        <Toaster richColors closeButton />
+        {children}
+      </body>
     </html>
   );
 }

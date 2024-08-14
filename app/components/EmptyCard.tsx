@@ -14,6 +14,7 @@ const EmptyCard = () => {
       onClick={() => {
         router.push('/create');
       }}
+      data-testid="empty-card"
     >
       <Plus className="text-white transition-transform duration-700 ease-in-out" width={60} height={60} />
 

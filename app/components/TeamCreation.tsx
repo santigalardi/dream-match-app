@@ -3,58 +3,39 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { fetchCompetitions, fetchCountries, fetchTeam, fetchTeams } from '../utils/searchPlayer';
 import ImageWithFallback from './ImageWithFallback';
-import FootballPitch, { Player, Position } from './FootballPitchEditable';
+import { Player, Position } from './FootballPitchEditable';
 import PlayerSearch from './PlayerSearch';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { myTeam } from '../utils/defaultTeamSchema';
+import FootballPitchEditable from './FootballPitchEditable';
 
 interface Team {
-  team_key: string;
-  team_name: string;
-  team_badge: string;
+  id: string;
+  name: string;
+  badge: string;
+  players: Player[];
 }
 
-let equipoA = [
-  {
-    player_id: '1',
-    player_name: 'Marchesin',
-    player_image: 'https://apiv3.apifootball.com/badges/players/6424_a-marchesin.jpg',
-  },
-  {
-    player_id: '2',
-    player_name: 'Van Dijk',
-    player_image: 'https://apiv3.apifootball.com/badges/players/15486_v-van-dijk.jpg',
-  },
-  {
-    player_id: '3',
-    player_name: 'Messi',
-    player_image: 'https://apiv3.apifootball.com/badges/players/2127_l-messi.jpg',
-  },
-  {
-    player_id: '4',
-    player_name: 'Ronaldo',
-    player_image: 'https://apiv3.apifootball.com/badges/players/52515_cristiano-ronaldo.jpg',
-  },
-  {
-    player_id: '5',
-    player_name: 'Neymar',
-    player_image: 'https://apiv3.apifootball.com/badges/players/327_neymar.jpg',
-  },
-];
+interface TeamCreationProps {
+  id?: string;
+  team?: Team;
+}
 
-const TeamCreation = () => {
+const TeamCreation = ({ team }: TeamCreationProps) => {
   const [countries, setCountries] = useState<any[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>('País');
   const [leagues, setLeagues] = useState<any[]>([]);
   const [selectedLeague, setSelectedLeague] = useState<string>('Liga');
   const [teams, setTeams] = useState<any[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<string>('Equipo');
-  const [team, setTeam] = useState<Team | null>(null);
+  const [teamBadge, setTeamBadge] = useState<string | null>(team?.badge || null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [newTeam, setNewTeam] = useState<Player[]>(equipoA);
+  const [newTeam, setNewTeam] = useState<Player[]>(team?.players || myTeam);
   const [showPlayerSearch, setShowPlayerSearch] = useState<boolean>(false);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
-  const [teamName, setTeamName] = useState<string>('');
+  const [teamName, setTeamName] = useState<string>(team?.name || '');
   const router = useRouter();
 
   const removePlayer = (playerId: string) => {
@@ -68,15 +49,42 @@ const TeamCreation = () => {
     setShowPlayerSearch(true);
   };
 
-  const addPlayer = (player: Player, position: Position) => {
+  const addPlayer = (newPlayer: Player, position: Position) => {
+    // Verificar si el jugador ya está en otro equipo
+    const getAllPlayersFromSavedTeams = (excludeTeamId?: string): Player[] => {
+      const savedTeams = JSON.parse(localStorage.getItem('teams') || '[]');
+      // Filtrar equipos para excluir el equipo que se está editando
+      const filteredTeams = savedTeams.filter((team: { id: string }) => team.id !== excludeTeamId);
+
+      const allPlayers = filteredTeams.flatMap((team: { players: Player[] }) => team.players);
+      return allPlayers;
+    };
+
+    const existingPlayers = getAllPlayersFromSavedTeams(team?.id);
+    const isPlayerDuplicate = existingPlayers.some((player) => player.player_name === newPlayer.player_name);
+
+    if (isPlayerDuplicate) {
+      toast.error('Este jugador ya está en otro equipo.');
+      return;
+    }
+
+    // Verificar si el jugador ya está en el equipo actual
+    const isPlayerInTeam = newTeam.some((player) => player.player_name === newPlayer.player_name);
+
+    if (isPlayerInTeam) {
+      toast.error('Este jugador ya está en tu equipo.');
+      return;
+    }
+
+    // Agregar el nuevo jugador al equipo
     setNewTeam((prevTeam) => {
       const updatedTeam = prevTeam.map((p) =>
         p.player_id === position.player_id
-          ? { ...p, player_name: player.player_name, player_image: player.player_image }
+          ? { ...p, player_name: newPlayer.player_name, player_image: newPlayer.player_image }
           : p
       );
       if (!updatedTeam.find((p) => p.player_id === position.player_id)) {
-        updatedTeam.push({ ...player, player_id: position.player_id });
+        updatedTeam.push({ ...newPlayer, player_id: position.player_id });
       }
 
       return updatedTeam;
@@ -89,36 +97,27 @@ const TeamCreation = () => {
   };
 
   const isFormValid = () => {
-    return teamName.trim() !== '' && team?.team_badge !== undefined && isTeamComplete();
+    return teamName.trim() !== '' && teamBadge !== undefined && isTeamComplete();
   };
 
   const countPlayersWithName = () => {
     return newTeam.filter((player) => player.player_name).length;
   };
 
-  const saveTeamToLocal = (team: { name: string; badge: string; players: Player[] }) => {
+  const saveTeamToLocal = (newTeamData: { id: string; name: string; badge: string; players: Player[] }) => {
     const existingTeams = JSON.parse(localStorage.getItem('teams') || '[]');
-    existingTeams.push(team);
-    localStorage.setItem('teams', JSON.stringify(existingTeams));
+    const updatedTeams = existingTeams.filter((team: Team) => team.id !== newTeamData.id);
+    updatedTeams.push(newTeamData);
+    localStorage.setItem('teams', JSON.stringify(updatedTeams));
   };
-
-  useEffect(() => {
-    const element = document.getElementById('player-search-container');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [selectedPosition, showPlayerSearch]);
 
   useEffect(() => {
     const fetchCountriesData = async () => {
       try {
         const data = await fetchCountries();
         setCountries(data);
-        setTeam(null);
       } catch (error) {
         setError('Error al cargar los países');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -132,7 +131,7 @@ const TeamCreation = () => {
           const data = await fetchCompetitions(selectedCountry);
           setLeagues(data);
           setTeams([]);
-          setTeam(null);
+          setTeamBadge(null);
         } catch (error) {
           setError('Error al cargar las competiciones');
         }
@@ -151,7 +150,7 @@ const TeamCreation = () => {
         try {
           const data = await fetchTeams(selectedLeague);
           setTeams(data);
-          setTeam(null);
+          setTeamBadge(null);
         } catch (error) {
           setError('Error al cargar los equipos');
         }
@@ -168,7 +167,7 @@ const TeamCreation = () => {
       if (selectedTeam !== 'Equipo') {
         try {
           const data = await fetchTeam(selectedTeam);
-          setTeam(data);
+          setTeamBadge(data.team_badge);
         } catch (error) {
           setError('Error al cargar los jugadores');
         }
@@ -180,6 +179,13 @@ const TeamCreation = () => {
     fetchTeamData();
   }, [selectedTeam]);
 
+  useEffect(() => {
+    const element = document.getElementById('player-search-container');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedPosition, showPlayerSearch]);
+
   const handleChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -190,27 +196,27 @@ const TeamCreation = () => {
     event.preventDefault();
 
     const newTeamData = {
+      id: team?.id || crypto.randomUUID(),
       name: teamName,
-      badge: team?.team_badge || '',
+      badge: teamBadge || '',
       players: newTeam,
     };
 
     saveTeamToLocal(newTeamData);
     setTeamName('');
-    setNewTeam(equipoA);
+    setNewTeam(myTeam);
 
     router.push('/myteams');
   };
 
   return (
-    <div className="rounded-xl shadow-xl glass-effect-card">
-      <div className="flex flex-col lg:flex-row p-8 gap-8 ">
-        <aside className="relative flex-1 bg-white rounded-xl p-6 shadow-lg">
-          <h2 className="text-4xl font-bold mb-6 text-gray-800">Crear Equipo </h2>
-          <div className="absolute top-0 right-10 flex items-center mt-4">
+    <div>
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="relative md:flex-1 bg-white rounded-xl p-6 shadow-lg">
+          <div className="flex items-center justify-center mt-4">
             <ImageWithFallback
-              src={team?.team_badge || ''}
-              alt={`${team?.team_name} badge`}
+              src={teamBadge || ''}
+              alt={`badge`}
               fallbackSrc="badge"
               width={80}
               height={80}
@@ -227,6 +233,8 @@ const TeamCreation = () => {
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 className="w-full border border-gray-400 rounded-lg p-3 text-gray-800"
+                data-testid="team-name-input"
+                required
               />
             </div>
             <div>
@@ -267,10 +275,12 @@ const TeamCreation = () => {
                   value={selectedTeam}
                   onChange={handleChange(setSelectedTeam)}
                   className="w-full border border-gray-400 rounded-lg p-3 text-gray-800"
+                  data-testid="teamSelect"
+                  required
                 >
                   <option value="Equipo">Equipo</option>
                   {teams.map((team) => (
-                    <option key={team.team_key} value={team.team_key}>
+                    <option key={team.team_key} data-testid="teamOption" value={team.team_key}>
                       {team.team_name}
                     </option>
                   ))}
@@ -279,31 +289,30 @@ const TeamCreation = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+              className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400"
               disabled={!isFormValid()}
             >
-              Crear
+              {team?.id ? 'Guardar' : 'Crear'}
             </button>
+            <p className="text-sm text-black mb-10">
+              *Para crear un equipo debes añadir un nombre, un escudo y 5 jugadores
+            </p>
           </form>
-        </aside>
-        <aside className="flex flex-col items-center justify-center h-96">
-          <div className="flex flex-col justify-center items-center text-lg">
-            <FootballPitch players={newTeam} onRemovePlayer={removePlayer} onSearchPlayer={searchPlayer} />
-            {isTeamComplete() ? (
-              <p className="text-center text-green-500 mt-4">¡Equipo completo!</p>
-            ) : (
-              <div className="text-center mt-4">
-                <p className="text-white">Jugadores añadidos {countPlayersWithName()}/5</p>
-              </div>
-            )}
-          </div>
-        </aside>
+        </div>
+        <div className="flex flex-col items-center justify-center">
+          <FootballPitchEditable
+            players={newTeam}
+            onRemovePlayer={removePlayer}
+            onSearchPlayer={searchPlayer}
+          />
+          {isTeamComplete() ? (
+            <p className="text-green-500 text-center pt-16">¡Equipo completo!</p>
+          ) : (
+            <p className="text-white text-center pt-16">Jugadores añadidos {countPlayersWithName()}/5</p>
+          )}
+        </div>
       </div>
-      <div>
-        <p className="text-sm text-white mb-10 text-end pr-8">
-          *Para crear un equipo debes añadir un nombre, un escudo y 5 jugadores
-        </p>
-      </div>
+      <div></div>
 
       {showPlayerSearch && <PlayerSearch position={selectedPosition} onAddPlayer={addPlayer} />}
     </div>

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ['localhost', 'apiv3.apifootball.com'],
     remotePatterns: [
       {
         protocol: 'https',

@@ -6,14 +6,16 @@ import { Trash2, Edit } from 'lucide-react';
 
 interface TeamCardProps {
   team: {
+    id: string;
     name: string;
     badge: string;
     players: Player[];
   };
   onRemove: () => void;
+  onEdit: () => void;
 }
 
-const TeamCard: React.FC<TeamCardProps> = ({ team, onRemove }) => {
+const TeamCard: React.FC<TeamCardProps> = ({ team, onRemove, onEdit }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -24,6 +26,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onRemove }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {}}
+      data-testid="team-card"
     >
       <div className="flex justify-between items-center px-8">
         <h2 className="text-2xl font-bold">{team.name}</h2>
@@ -43,7 +46,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onRemove }) => {
           className="px-2 text-white bg-blue-500 rounded-full cursor-pointer transform transition-transform duration-300 hover:scale-110"
           width={40}
           height={40}
-          onClick={() => {}}
+          onClick={onEdit}
         />
         <Trash2
           className="px-2 text-white bg-red-500 rounded-full cursor-pointer transform transition-transform duration-300 hover:scale-110"

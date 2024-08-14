@@ -13,8 +13,8 @@ import PlayerCard from './PlayerCard';
 import { Player, Position } from './FootballPitchEditable';
 
 interface PlayerSearchProps {
-  position: Position | null; // Recibe la posición seleccionada
-  onAddPlayer: (player: Player, position: Position) => void; // Función para agregar el jugador
+  position: Position | null;
+  onAddPlayer: (player: Player, position: Position) => void;
 }
 
 const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) => {
@@ -240,9 +240,9 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
         <p>Loading...</p>
       ) : playerList ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-          {playerList.map((player) => (
-            <div key={player.player_id} className="flex items-center justify-center">
-              <PlayerCard player={player} defaultImage="player" onAddPlayer={handleAddPlayer} />
+          {playerList.map((player, index) => (
+            <div key={index} className="flex items-center justify-center">
+              <PlayerCard player={player} onAddPlayer={handleAddPlayer} />
             </div>
           ))}
         </div>

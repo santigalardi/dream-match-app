@@ -12,7 +12,7 @@ interface PlayerCardProps {
   onAddPlayer: (player: Player) => void;
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ player, defaultImage, onAddPlayer }) => {
+const PlayerCard: React.FC<PlayerCardProps> = ({ player, onAddPlayer }) => {
   return (
     <div className="relative w-52 bg-main-darkGold shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 border border-gray-200 glass-effect-card transition-transform transform hover:scale-105 hover:shadow-xl group">
       <ImageWithFallback

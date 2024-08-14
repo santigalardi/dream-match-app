@@ -22,7 +22,9 @@ const ImageWithFallback = ({ src, alt = '', fallbackSrc = 'player', ...props }: 
     return defaultPlayerImage;
   };
 
-  return <Image alt={alt} onError={() => setError(true)} src={error ? getFallbackSrc() : src} {...props} />;
+  const imageSrc = src && !error ? src : getFallbackSrc();
+
+  return <Image alt={alt} onError={() => setError(true)} src={imageSrc} {...props} />;
 };
 
 export default ImageWithFallback;
