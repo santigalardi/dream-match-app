@@ -54,10 +54,14 @@ const TeamCreation = ({ team }: TeamCreationProps) => {
     const getAllPlayersFromSavedTeams = (excludeTeamId?: string): Player[] => {
       const savedTeams = JSON.parse(localStorage.getItem('teams') || '[]');
       // Filtrar equipos para excluir el equipo que se está editando
-      const filteredTeams = savedTeams.filter((team: { id: string }) => team.id !== excludeTeamId);
-
-      const allPlayers = filteredTeams.flatMap((team: { players: Player[] }) => team.players);
-      return allPlayers;
+      if (excludeTeamId) {
+        const filteredTeams = savedTeams.filter((team: { id: string }) => team.id !== excludeTeamId);
+        const allPlayers = filteredTeams.flatMap((team: { players: Player[] }) => team.players);
+        return allPlayers;
+      } else {
+        const allPlayers = savedTeams.flatMap((team: { players: Player[] }) => team.players);
+        return allPlayers;
+      }
     };
 
     const existingPlayers = getAllPlayersFromSavedTeams(team?.id);
@@ -108,6 +112,12 @@ const TeamCreation = ({ team }: TeamCreationProps) => {
     const existingTeams = JSON.parse(localStorage.getItem('teams') || '[]');
     const updatedTeams = existingTeams.filter((team: Team) => team.id !== newTeamData.id);
     updatedTeams.push(newTeamData);
+    localStorage.setItem('teams', JSON.stringify(updatedTeams));
+  };
+
+  const updateTeamInLocal = (teamData: Team) => {
+    const teams = JSON.parse(localStorage.getItem('teams') || '[]');
+    const updatedTeams = teams.map((team: Team) => (team.id === teamData.id ? teamData : team));
     localStorage.setItem('teams', JSON.stringify(updatedTeams));
   };
 
@@ -202,7 +212,12 @@ const TeamCreation = ({ team }: TeamCreationProps) => {
       players: newTeam,
     };
 
-    saveTeamToLocal(newTeamData);
+    if (team?.id) {
+      updateTeamInLocal(newTeamData);
+    } else {
+      saveTeamToLocal(newTeamData);
+    }
+
     setTeamName('');
     setNewTeam(myTeam);
 

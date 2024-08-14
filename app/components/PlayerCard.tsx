@@ -23,10 +23,10 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, onAddPlayer }) => {
         className="rounded-full"
       />
       <div>
-        <h3 className="text-xl font-semibold text-white mb-6">{player.player_name}</h3>
+        <h3 className="text-xl font-semibold text-white mb-8">{player.player_name}</h3>
       </div>
       <button
-        className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-main-lightBlue text-white h-8 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-main-gold"
+        className="absolute bottom-1 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-green-500 text-white rounded-lg hover:bg-green-600 px-4 py-2"
         onClick={() => onAddPlayer(player)}
       >
         Añadir

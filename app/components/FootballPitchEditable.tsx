@@ -41,16 +41,17 @@ const FootballPitchEditable: React.FC<FootballPitchEditableProps> = ({
       <Image
         src={'/half-pitch.png'}
         alt="half-soccer-pitch"
-        width={2000}
-        height={2000}
-        className="block lg:hidden" // Solo se muestra en dispositivos pequeños
+        width={1000}
+        height={1000}
+        className="block lg:hidden"
         priority
       />
       <Image
         src={'/half-pitch.png'}
         alt="half-soccer-pitch"
-        width={2000}
-        height={2000}
+        width={1000}
+        height={1000}
+        layout="responsive"
         className="hidden lg:block"
         priority
       />

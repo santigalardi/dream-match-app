@@ -27,7 +27,7 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
   const [players, setPlayers] = useState<any[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('Jugador');
   const [playerList, setPlayerList] = useState<any[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,8 +37,6 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
         setCountries(data);
       } catch (error) {
         setError('Error al cargar los países');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -110,11 +108,14 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
   useEffect(() => {
     const fetchPlayerData = async () => {
       if (selectedPlayer !== 'Jugador') {
+        setLoading(true);
         try {
           const data = await fetchPlayerById(selectedPlayer);
           setPlayerList(data);
         } catch (error) {
           setError('Error al cargar los datos del jugador');
+        } finally {
+          setLoading(false);
         }
       } else {
         setPlayerList(null);
@@ -126,7 +127,6 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
     const formData = new FormData(event.currentTarget);
     const playerName = formData.get('playerName') as string;
 
@@ -135,6 +135,7 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
     }
 
     try {
+      setLoading(true);
       const data = await fetchPlayerByName(playerName);
       setPlayerList(data);
     } catch (error) {
@@ -158,7 +159,7 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
   if (error) return <p>{error}</p>;
 
   return (
-    <div id="player-search-container" className="bg-gray-50 rounded-xl shadow-xl p-8">
+    <div id="player-search-container" className="bg-gray-50 rounded-xl shadow-xl p-8 mt-20">
       <div className="flex flex-col lg:flex-row mb-10">
         <form onSubmit={handleSubmit} className="w-full space-y-8 ">
           <div className="flex justify-between items-center">
@@ -171,7 +172,10 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
                 type="text"
                 placeholder="Buscar por nombre"
               />
-              <button type="submit" className="bg-blue-500 text-white rounded-lg px-4 py-2">
+              <button
+                type="submit"
+                className="bg-green-500 text-white rounded-lg hover:bg-green-600 px-6 py-3"
+              >
                 Buscar
               </button>
             </div>
@@ -237,7 +241,14 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ position, onAddPlayer }) =>
         </form>
       </div>
       {loading ? (
-        <p>Loading...</p>
+        <div className="flex items-center justify-center w-full max-h-44 ">
+          <div className="bg-black rounded-full h-44 w-44">
+            <video className="h-full w-full rounded-full" autoPlay muted loop>
+              <source src="/logo-loading.mp4" type="video/mp4" />
+              Tu navegador no soporta el elemento de video.
+            </video>
+          </div>
+        </div>
       ) : playerList ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-12">
           {playerList.map((player, index) => (

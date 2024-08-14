@@ -20,7 +20,14 @@ const FootballPitch: React.FC<FootballPitchProps> = ({ players }) => {
 
   return (
     <div className="relative">
-      <Image src={'/half-pitch.png'} alt="half-soccer-pitch" width={2000} height={2000} priority />
+      <Image
+        src={'/half-pitch.png'}
+        alt="half-soccer-pitch"
+        width={1000}
+        height={1000}
+        layout="responsive"
+        priority
+      />
       {positions.map((position) => {
         const player = players.find((p) => p.player_id === position.player_id);
 

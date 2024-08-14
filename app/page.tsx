@@ -27,9 +27,7 @@ export default function Home() {
                 Tu navegador no soporta el elemento de video.
               </video>
             ) : (
-              <div>
-                <Image src="/logo.webp" height={200} width={200} alt="logo" className="object-cover" />
-              </div>
+              <Image src="/logo.webp" height={100} width={100} alt="logo" />
             )}
           </div>
         </Link>
